@@ -54,7 +54,7 @@ int *imagen()
   
   while (bandera == false)
   {
-    Serial.println("Que LED desea encender  [S/n]");
+    Serial.println("Desea encender un LED  [S/n]");
     while (!Serial.available()>0);
     //Serial.setTimeout(5000);
     captura = Serial.read();
@@ -127,7 +127,7 @@ int *reset(int *_arreglo_LEDS)
 void publik()
 {
   bool bandera=true;
-  int C_segundos,c,c2;
+  int C_segundos,c=1,c2;
   int patrones; 
   
   Serial.println("Ingrese la cantidad de patrones que desee formar: ");
@@ -142,8 +142,12 @@ void publik()
   
   for (int profundidad=0; profundidad<patrones; profundidad++) *(arreglo_2D+profundidad) = new int[64];
   
-  for (int i=0; i < patrones; i++){
+  for (int i=0; i < patrones; i++)
+  {
+    
+    Serial.print("Inicia Patron: ");Serial.println(c); Serial.println("n para terminar el patron");
     imagen();
+    c++;
     for (int posiciones = 0; posiciones <= 64; posiciones++){
       arreglo_2D[i][posiciones]= *(arreglo_LEDS+posiciones);
     }
@@ -152,6 +156,7 @@ void publik()
   
  c = 0;
   c2 = 0;
+  Serial.println("Presione un caracter para volver al menu");
   while (bandera==true)
   {
   while(c2<=patrones)
@@ -178,9 +183,10 @@ void publik()
     c=0;
     }
     c2=0;
-    Serial.println("Presione un caracter para volver al menu");
+    
     if (Serial.available() > 0)
     {
+      char temp=Serial.read();
       apagarLEDS2d(patrones);
       bandera=false;
     }
@@ -196,7 +202,24 @@ void publik()
 void apagarLEDS()
 {
   int arreglo[64]={0};
-  leerarreglo(arreglo);
+  int c = 0;
+    while(c<=64)
+  {
+    if (arreglo[c]==1)
+    {
+      digitalWrite(SER,0);
+        CLOCK1();
+        CLOCK2();
+        c++;
+    }
+    else
+    {
+      digitalWrite(SER,0);
+          CLOCK1();
+          CLOCK2();
+          c++;
+    }      
+  }
   
 }
 
@@ -268,7 +291,7 @@ void minimenu()
       
        Serial.println("Presione un caracter para volver al menu");
       while (!Serial.available()>0);
-	temp=Serial.read();
+		temp=Serial.read();
       apagarLEDS();
       //delete[] arreglo_LEDS;
       
