@@ -1,10 +1,10 @@
 const int SER = 13;
 const int RCLK = 12;
 const int SRCLK = 11;
-const int tamanio = 63;
+
 
 //memoria dinámica
-int *arreglo_LEDS= new int[63];
+int *arreglo_LEDS= new int[64];
 
 void setup(){  
   // configuración de puertos digitales como salida
@@ -12,10 +12,6 @@ void setup(){
   for (unsigned int j = 13; j>10; j--) digitalWrite(j, 0);  
   Serial.begin(9600);
   
-  Serial.println("Ingrese una opcion:");
-  Serial.println("1. Desea comprobar que todos los LEDS funcionan correctamente ");
-  Serial.println("2. Desea mostrar un patron ");  
-  Serial.println("3. Desea mostrar una secuencia de patrones ");
  }
 
 //Funcion #1 ---- Almacena datos (1 / 0)
@@ -51,7 +47,7 @@ void verificacion()
  * captura dichas entradas y forma un arreglo con los valores
  * ingresados y retorna dicho arreglo */
 int *imagen()
-{  
+{ 
   int captura_LED;
   char captura=0;
   bool bandera = false;
@@ -63,7 +59,7 @@ int *imagen()
     //Serial.setTimeout(5000);
     captura = Serial.read();
     
-    if (captura == 's')
+    if (captura == 's'||captura == 'S')
     {
       do 
       {
@@ -81,7 +77,7 @@ int *imagen()
       
       arreglo_LEDS[65-captura_LED]= 1;     
     }
-    else if (captura == 'n')
+    else if (captura == 'n'||captura == 'N')
     {
       bandera = true;
     }
@@ -98,16 +94,16 @@ void *leerarreglo(int arreglo[]){
   	int c = 0;
     while(c<=64)
   {
-    if (arreglo_LEDS[c]==0)
+    if (arreglo_LEDS[c]==1)
     {
-      digitalWrite(SER,0);
+      digitalWrite(SER,1);
         CLOCK1();
         CLOCK2();
         c++;
     }
-    else if(arreglo_LEDS[c]==1)
+    else
     {
-      digitalWrite(SER,1);
+      digitalWrite(SER,0);
           CLOCK1();
           CLOCK2();
           c++;
@@ -119,8 +115,10 @@ void *leerarreglo(int arreglo[]){
  * en el código, por lo que, le brinda al usuario distintos tipos
  * de entrada, como chequeo del funcionamiento de leds, ingreso de patrones.*/
 
-int *reset(int *_arreglo_LEDS){
-  for (int r = 0; r < 64; r++){
+int *reset(int *_arreglo_LEDS)
+{
+  for (int r = 0; r < 64; r++)
+  {
     arreglo_LEDS[r]=0;
   }
   return _arreglo_LEDS;
@@ -146,7 +144,7 @@ void publik()
   
   for (int i=0; i < patrones; i++){
     imagen();
-    for (int posiciones = 0; posiciones < 64; posiciones++){
+    for (int posiciones = 0; posiciones <= 64; posiciones++){
       arreglo_2D[i][posiciones]= *(arreglo_LEDS+posiciones);
     }
     reset(arreglo_LEDS);
@@ -180,9 +178,11 @@ void publik()
     c=0;
     }
     c2=0;
+    Serial.println("Presione un caracter para volver al menu");
     if (Serial.available() > 0)
     {
-      break;
+      apagarLEDS2d(patrones);
+      bandera=false;
     }
   
   }
@@ -193,29 +193,98 @@ void publik()
   
 }
 
+void apagarLEDS()
+{
+  int arreglo[64]={0};
+  leerarreglo(arreglo);
+  
+}
+
+void apagarLEDS2d(int cPatrones)
+{
+  int arreglo2de0[cPatrones][64]={0};
+  
+  int c = 0; int c2 = 0;
+
+  while(c2<=cPatrones)
+    {
+    while(c<=64)
+    {
+      if (arreglo2de0[c2][c]==1)
+      {
+        digitalWrite(SER,0);
+          CLOCK1();
+          CLOCK2();
+          c++;
+      }
+      else 
+      {
+        digitalWrite(SER,0);
+            CLOCK1();
+            CLOCK2();
+            c++;
+      }
+    }
+    
+    c2++;
+    c=0;
+    
+    }
+    
+    c2=0;
+
+  
+}
+
 void minimenu()
 { 
-  int dato = Serial.parseInt();
-  switch (dato)
-  {    
-  case 1:
-    verificacion();
-    
-  	break;
 
-  case 2:
-    int *x;
-    x = imagen();
-    leerarreglo(x);
-    delete[] arreglo_LEDS;
-  	break;
-    
-  case 3:
-    publik();
-    
-  default:
-    
-    break;
+  
+  int dato;
+  bool bandera=false;
+  while (bandera!=true)
+  {
+    Serial.println("Ingrese una opcion:");
+  	Serial.println("1. Desea comprobar que todos los LEDS funcionan correctamente ");
+  	Serial.println("2. Desea mostrar un patron ");  
+  	Serial.println("3. Desea mostrar una secuencia de patrones ");
+    while (!Serial.available()>0);
+    dato=Serial.parseInt();
+  
+    switch (dato)
+    {    
+      case 1:
+      verificacion();
+      delay(1000);
+		apagarLEDS();
+      break;
+
+      case 2:
+      char temp;
+      int *x;
+      x = imagen();
+      leerarreglo(x);
+      reset(arreglo_LEDS);
+      
+       Serial.println("Presione un caracter para volver al menu");
+      while (!Serial.available()>0);
+	temp=Serial.read();
+      apagarLEDS();
+      //delete[] arreglo_LEDS;
+      
+      
+      break;
+      case 3:
+      
+      publik();
+      break;
+      
+
+      
+      default:
+      Serial.println("Valor no permitido, intente nuevamente");
+      break;
+    }
   }
 }
  
@@ -223,3 +292,4 @@ void loop()
 {  
   minimenu();
 }
+
