@@ -35,7 +35,6 @@
   1. Desea comprobar que todos los LEDS funcionan correctamente 
   2. Desea mostrar un patron 
   3. Desea mostrar una secuencia de patrones 
-  4. Apagar LEDS 
  
  R/ Si se ingresa la opción 1, el resultado esperado es que se enciendan los LEDS durandte
    un segundo y luego se apagan automáticamente.
@@ -348,7 +347,7 @@ void minimenu()
       leerarreglo(x);
       reset(arreglo_LEDS);
       
-      Serial.println("Presione un caracter para volver al menu");
+      Serial.println("Presione un caracter para volver al menu principal");
       while (!Serial.available()>0);
       temp=Serial.read();
       apagarLEDS();      
